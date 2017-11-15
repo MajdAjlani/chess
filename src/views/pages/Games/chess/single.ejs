@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <% include ../../layouts/head %>
+  <link href="/public/css/chess.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+
+    <% include ../../layouts/header %>
+
+<!-- ===================== Breadcumb area start ===================== -->
+<section class="breadcumb_area">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="breadcumb_section">
+                    <!-- Breadcumb page title start -->
+                    <div class="page_title">
+                        <h3>Chess</h3>
+                    </div>
+                    <!-- Breadcumb page pagination start -->
+                    <div class="page_pagination">
+                        <ul>
+                            <li><a href="/">Home</a></li>
+                            <li><i class="fa fa-angle-right" aria-hidden="true"></i></li>
+                            <li>Chess</li>
+                            <li><i class="fa fa-angle-right" aria-hidden="true"></i></li>
+                            <li>Single Player</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- ===================== Breadcumb area end ===================== -->
+
+
+
+
+<div class="container">
+
+
+  <div class="container flex-container single-mode">
+
+  <div class="main">
+
+		<div id="Board"></div>
+    <div class="text-left" style="padding-left:5%">
+      <div>Searching Time:
+        <select id="ThinkTimeChoice">
+          <option value="0.5">0.5s</option>
+          <option value="1" selected>1s</option>
+          <option value="2">2s</option>
+          <option value="4">4s</option>
+          <option value="6">6s</option>
+          <option value="8">8s</option>
+          <option value="10">10s</option>
+        </select> &nbsp;
+        Depth:
+        <select id="DepthChoice">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3" selected>3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+        </select><br/><br/>
+
+        <!--
+        <span id="BestOut">BestMove:</span><br/>
+        <span id="DepthOut">Depth:</span><br/>
+        <span id="ScoreOut">Score:</span><br/>
+        <span id="NodesOut">Nodes:</span><br/>
+        <span id="OrderingOut">Ordering:</span><br/>
+        <span id="TimeOut">Time:</span><br/><br/>
+        -->
+
+        <div class="btn-group">
+        <button type="button" class="btn btn-default" id="SearchButton">Move Now</button>
+        <button type="button" class="btn btn-default" id="NewGameButton">New Game</button>
+        <button type="button" class="btn btn-default" id="FlipButton">Flip Board</button>
+        <button type="button" class="btn btn-default" id="TakeButton">Take Back</button>
+        </div>
+        <span id="GameStatus"></span>
+      </div>
+    </div>
+  </div>
+
+
+
+    </div>
+    </div>
+    </div>
+		<script src="/public/js/jquery-3.2.1.min.js"></script>
+		<script src="/public/js/Games/Chess/definitions.js"></script>
+
+		<script src="/public/js/Games/Chess/board.js"></script>
+		<script src="/public/js/Games/Chess/movement/movegen.js"></script>
+		<script src="/public/js/Games/Chess/movement/makemove.js"></script>
+		<script src="/public/js/Games/Chess/Interfaces/io.js"></script>
+		<script src="/public/js/Games/Chess/Artificial_Intelligence/evaluate.js"></script>
+		<script src="/public/js/Games/Chess/Artificial_Intelligence/pvtable.js"></script>
+    <script src="/public/js/Games/Chess/Artificial_Intelligence/search.js"></script>
+		<script src="/public/js/Games/Chess/Interfaces/GUI.js"></script>
+		<script src="/public/js/Games/Chess/main.js"></script>
+
+
+
+
+
+<% include ../../layouts/footer %>
+
+
+<script>
+<% if (socket == undefined && username != null) { %>
+  socket = io();
+  socket.connect();
+  socket.emit('registerOnlineUser','<%- username %>');
+<% } else if(username != null){%>
+  socket = io();
+  socket.connect();
+  socket.emit('registerOnlineUser','<%- username %>');
+<% } %>
+
+
+
+</script>
+
+
+</body>
+
+</html>

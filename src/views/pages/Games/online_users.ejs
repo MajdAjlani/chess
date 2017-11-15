@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <% include ../layouts/head %>
+  <link href="/public/css/chess.css" rel="stylesheet" type="text/css">
+
+</head>
+
+<body>
+
+    <% include ../layouts/header %>
+
+<!-- ===================== Breadcumb area start ===================== -->
+<section class="breadcumb_area">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="breadcumb_section">
+                    <!-- Breadcumb page title start -->
+                    <div class="page_title">
+                        <h3>Online Users</h3>
+                    </div>
+                    <!-- Breadcumb page pagination start -->
+                    <div class="page_pagination">
+                        <ul>
+                            <li><a href="/">Home</a></li>
+                            <li><i class="fa fa-angle-right" aria-hidden="true"></i></li>
+                            <li>Games</li>
+                            <li><i class="fa fa-angle-right" aria-hidden="true"></i></li>
+                            <li>Online Users</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- ===================== Breadcumb area end ===================== -->
+<div class="row">
+
+<div class="col-md-6 container find" id="find_x">
+<% if (Object.keys(online).length > 1 || (Object.keys(online).length == 1 && online[username] == undefined)){ %>
+
+<div class="btn-group-vertical center-block">
+  <h3 class="text-center text-success"> Online Users </h3>
+  <% for(var i in online) { %>
+    <% if(i !== username && (current_game == undefined || current_game != undefined && i != current_game.name)) {%>
+      <div class="online_user center-block">
+        <button type="button" value="<%- i %>" onclick="send_request('<%- i %>')" class="btn btn-default online_user"> <%- i %> </button>
+      </div>
+  <% } }%>
+</div>
+<% } else { %>
+  <h3 class="text-center text-danger"> No online users right now </h3>
+<% } %>
+
+</div>
+<div class="col-md-6 container find">
+  <h3 class="text-center text-info">Your Current Game</h3>
+  <p>
+    <% if(current_game !== undefined) { %>
+      <div class="online_user center-block">
+        <button type="button" value="<%- current_game.name %>" onclick="location.href ='/games/chess/multi/<%- current_game.playRoom %>'" class="btn btn-default online_user"> <%- current_game.name %> </button>
+      </div>
+      <% } else { %>
+        <div class="online_user center-block">
+          <h4 class="text-center text-info"> No Current Game available for You</h4>
+        </div>
+      <% } %>
+  </p>
+</div>
+</div>
+
+
+
+
+<% include ../layouts/footer %>
+
+<script>
+  socket = io();
+  socket.connect();
+  socket.emit('registerOnlineUser','<%- username %>');
+
+  socket.on('request_play_client',function (name,game_id) {
+    swal({
+          title: 'Playing Request!',
+          text: name + ' want to play with you!',
+          type: "info",
+          showCancelButton: true,
+          confirmButtonClass: "btn-success",
+          confirmButtonText: "Challenge Accepted!",
+          cancelButtonText: "No, thanks",
+          closeOnConfirm: false,
+          closeOnCancel: false
+          },
+          function(isConfirm) {
+            if (isConfirm) {
+              swal("Confirm!", "You will go to Game page, Good Luck.", "success");
+              socket.emit('response_play_server',name,game_id);
+              sleep(2000);
+              window.location.replace('/games/chess/multi/'+game_id);
+            } else {
+              swal("Cancelled", "OK, no problem.", "error");
+            }
+          });
+  });
+
+  socket.on('response_play_client',function (name,game_id) {
+    swal("Accepted!",name +' accept your request' , "success");
+    sleep(2000);
+    window.location.replace('/games/chess/multi/'+game_id);
+  });
+
+  function send_request(name) {
+      swal({
+          title: 'Sending Request!',
+          text: 'Are you sure to send playing request to '+name,
+          type: "info",
+          showCancelButton: true,
+          confirmButtonClass: "btn-success",
+          confirmButtonText: "Yes, send it!",
+          closeOnConfirm: false
+          },
+          function(){;
+            swal("Confirm!", "Your request has been sent to " +name, "success");
+            socket.emit('request_play_server',name);
+          });
+  }
+
+  socket.on('update_online_users',function (online) {
+    var val = '';
+    if (Object.keys(online).length > 1 || (Object.keys(online).length == 1 && online['<%-username%>'] == undefined)){
+      val = '<div class="btn-group-vertical center-block"><h3 class="text-center text-success"> Online Users </h3>';
+      for(var i in online) {
+        if(i !== '<%-username%>') {
+          <% if (current_game !== undefined) { %>
+            if(i !== '<%-current_game.name%>')
+              val += '<div class="online_user center-block"><button type="button" value="'+ i +'" onclick="send_request(\''+ i +'\')" class="btn btn-default online_user"> '+i+' </button></div>';
+        <% } else {%>
+              val += '<div class="online_user center-block"><button type="button" value="'+ i +'" onclick="send_request(\''+ i +'\')" class="btn btn-default online_user"> '+i+' </button></div>';
+          <% } %>
+        }
+     }
+     val += '</div>';
+     } else
+     {
+        val+='<h3 class="text-center text-danger"> No online users right now </h3>';
+     }
+    document.getElementById("find_x").innerHTML = val;
+  });
+
+</script>
+
+
+
+</body>
+
+</html>

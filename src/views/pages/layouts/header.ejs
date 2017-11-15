@@ -1,0 +1,132 @@
+<!-- preloader start -->
+<div id="preloader"></div>
+<!-- /.end preloader -->
+
+<header class="header_area">
+    <!-- Top Header Area Start -->
+    <div class="top_header_area hidden-xs">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-3 col-md-5">
+                    <!--  Top Quote Area Start -->
+                    <div class="top_quote hidden-sm">
+                        <p>Welcome to GameHub gamining platform.</p>
+                    </div>
+                </div>
+                <div class="col-sm-9 col-md-7">
+                    <div class="social_reg_log_area">
+                        <!--  Top Social bar start -->
+                        <div class="top_social_bar">
+                            <a href="#"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+                            <a href="#"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+                        </div>
+                        <!--  Login Register Area -->
+                        <div class="login_register">
+                          <% if (username === null) { %>
+                            <div class="login">
+                                <i class="fa fa-sign-in" aria-hidden="true"></i>
+                                <a href="/login">Login</a>
+                            </div>
+                            <div class="reg">
+                                <i class="fa fa-user" aria-hidden="true"></i>
+                                <a href="/register">Register</a>
+                            </div>
+                            <% } else { %>
+                            <div class="reg">
+                                <i class="fa fa-user" aria-hidden="true"></i>
+                                <a href="/register"><%- username %></a>
+                            </div>
+                            <div class="login">
+                                <i class="fa fa-sign-out" aria-hidden="true"></i>
+                                <a href="/logout" onclick="event.preventDefault();document.getElementById('logout-form').submit();">logout</a>
+                            </div>
+                            <form id="logout-form" action="/logout" method="GET" style="display: none;">
+                            </form>
+                            <% } %>
+
+                        </div>
+
+                        <div class="language_area">
+                            <div class="dropdown">
+                                <button aria-expanded="false" aria-haspopup="true" data-toggle="dropdown" id="lag" type="button" class="btn btn-default dropdown-toggle">
+                                    <i class="fa fa-globe" aria-hidden="true"></i>Language
+                                    <i class="fa fa-caret-down" aria-hidden="true"></i>
+                                </button>
+                                <ul aria-labelledby="lag" class="dropdown-menu">
+                                    <li>
+                                        <a href="#"><img alt="" src="../../../public/img/core-img/lan-1.jpg">English</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Top Header Area  End -->
+
+    <!-- Main Header Area Start -->
+    <div class="main_header_area home2">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-3 col-xs-9">
+                    <!-- Logo Area -->
+                    <div class="logo_area">
+                        <a href="/"><img src="../../../public/img/core-img/logo.png" alt=""></a>
+                    </div>
+                </div>
+
+                <div class="col-sm-9 col-xs-12">
+                    <!-- Menu Area -->
+                    <div class="main_menu_area">
+                        <div class="mainmenu">
+                            <nav>
+                                <ul id="nav">
+                                    <li class="current_page_item"><a href="/">Home</a></li>
+                                    <li><a href="#">Games<i class="fa fa-caret-down" aria-hidden="true"></i>
+                                    </a>
+                                        <ul class="sub-menu">
+                                            <li><a href="/games/chess">Chess<i class="fa fa-caret-right" aria-hidden="true"></i>
+                                            </a>
+                                                <ul class="sub-menu">
+                                                    <li><a href="/games/chess/multi">Multi-player</a></li>
+                                                    <li><a href="/games/chess/single">Single-player</a></li>
+                                                </ul>
+                                            </li>
+                                         </ul>
+                                    </li>
+                                    <% if(username !== null) {%>
+                                    <li><a href="/find">Find Friends</a></li>
+                                    <% } %>
+                                    <li><a href="/about">About GameHub</a></li>
+                                    <li><a href="/contact">contact</a></li>
+                                </ul>
+                            </nav>
+                        </div>
+                        <!-- mainmenu end -->
+                        <!-- Search Button Area -->
+                        <div class="search_button hidden-xs">
+                            <a href="#"><i class="fa fa-search" aria-hidden="true"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Main Header Area End -->
+
+    <!-- Search Box Area Start -->
+    <div id="search">
+        <div class="search_box_area">
+            <form action="#" method="post">
+                <input type="text" name="s" id="search_box" placeholder="Enter keyword and hit enter">
+                <input type="submit" value="Submit" id="sub">
+                <div id="close_button">
+                    <i class="fa fa-times-circle" aria-hidden="true"></i>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Search Box Area End -->
+</header>

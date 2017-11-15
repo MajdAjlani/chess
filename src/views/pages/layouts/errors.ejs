@@ -1,0 +1,13 @@
+<% if (errors) { %>
+<div class="form-group" style="margin-top: 6px ">
+
+  <div class="alert alert-danger">
+    <ul>
+      <% errors.forEach(function(error) { %>
+        <li><%= error %></li>
+      <% }); %>
+    </ul>
+  </div>
+
+</div>
+<% } %>

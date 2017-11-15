@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <% include ../../layouts/head %>
+    <link href="/public/css/chess.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+
+  <% include ../../layouts/header %>
+
+    <!-- ===================== Breadcumb area start ===================== -->
+    <section class="breadcumb_area">
+      <div class="container">
+        <div class="row">
+          <div class="col-xs-12">
+            <div class="breadcumb_section">
+              <!-- Breadcumb page title start -->
+              <div class="page_title">
+                <h3>Chess</h3>
+              </div>
+              <!-- Breadcumb page pagination start -->
+              <div class="page_pagination">
+                <ul>
+                  <li><a href="/">Home</a></li>
+                  <li><i class="fa fa-angle-right" aria-hidden="true"></i></li>
+                  <li>Chess</li>
+                  <li><i class="fa fa-angle-right" aria-hidden="true"></i></li>
+                  <li>Multi Player</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ===================== Breadcumb area end ===================== -->
+
+
+
+
+
+
+
+    <div class="container">
+
+
+      <div class="container flex-container single-mode">
+
+        <div class="main">
+
+          <div id="Board"></div>
+
+        </div>
+
+
+
+        <div class="aside aside2" style="padding-top:10px;padding-left:100px;text-align:left">
+          <div id="ThinkingImageDiv" style="height:80px"></div>
+
+          <div class="multi_info_div">
+            <h3>
+        You are playing with <span class="label label-primary"><% if(username !== P1) {%><%- P1 %><%}else{%><%- P2 %><%} %></span>
+        </h3>
+          </div>
+          <h4>
+        <span class="label label-success" id="turn-label"> Your Turn </span><span class="label label-default"><label id="minutes">00</label>:<label id="seconds">00</label></span>
+      </h4>
+          <div class="btn-group">
+            <button type="button" class="btn btn-default" id="Resign">Resign game</button>
+            <button type="button" class="btn btn-default" id="draw">Ask for draw</button>
+          </div>
+          <div>
+            <span id="GameStatus"></span>
+          </div>
+          <div style="margin-top:16px">
+            <h4 class=" text-primary">History of moves</h4>
+            <div id="history_list">
+              <ul class="list-group">
+
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+
+
+
+
+    <script src="/public/js/jquery-3.2.1.min.js"></script>
+    <script src="/public/js/Games/Chess/definitions.js"></script>
+    <script src="/public/js/Games/Chess/board.js"></script>
+    <script src="/public/js/Games/Chess/movement/movegen.js"></script>
+    		<script src="/public/js/Games/Chess/Artificial_Intelligence/evaluate.js"></script>
+    <script src="/public/js/Games/Chess/movement/makemove.js"></script>
+    <script src="/public/js/Games/Chess/Interfaces/io.js"></script>
+    <script src="/public/js/Games/Chess/Interfaces/GUI-multi.js"></script>
+    <script src="/public/js/Games/Chess/main-multi.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script>
+      var socket = io();
+      socket.connect();
+      socket.emit('registerOnlineUser', '<%- username %>');
+
+
+       GUI.MakeUserMove = function() {
+        if (UserMove.from != SQUARES.NO_SQ && UserMove.to != SQUARES.NO_SQ) {
+          console.log("User Move:" + GUI.PrSq(UserMove.from) + GUI.PrSq(UserMove.to));
+
+          var parsed = GUI.ParseMove(UserMove.from, UserMove.to);
+
+          GUI.DeselectSq(UserMove.from);
+          GUI.DeselectSq(UserMove.to);
+
+          console.log("Parsed:" + parsed);
+
+          if (parsed != null) {
+            Move.MakeMove(parsed.move);
+            GUI.MoveGUIPiece(parsed.move);
+
+            GUI.CheckAndSet();
+
+            socket.emit('move', parsed, GameBoard.BoardToFen());
+            $("#history_list ul").append('<li class="list-group-item '+(GameController.PlayerSide == 0 ? 'active' : '')+'"> '+GUI.PrMove(parsed.move)+' <span class="badge">'+parsed.score+'</span> </li>');
+            $("#turn-label").text("Competitor Turn");
+            $("#turn-label").attr('class', 'label label-warning');
+            if(GameController.GameOver == true)
+            {
+              socket.emit('EndGame');
+              setTimeout(function() {
+                window.location.replace('/');
+              }, 4000);
+            }
+          }
+
+          UserMove.from = SQUARES.NO_SQ;
+          UserMove.to = SQUARES.NO_SQ;
+        }
+      }
+
+      <%if (side == 2) { %>
+      GameController.BoardFlipped = true;
+      GameController.PlayerSide = COLOURS.BLACK;
+      <% } %>
+
+      function NewGame() {
+        GameBoard.ParseFen('<%- position %>');
+        GameBoard.PrintBoard();
+        GUI.SetInitialBoardPieces();
+        GameController.PlayerSide = COLOURS.WHITE;
+        <%if (side == 2) { %>
+        GameController.PlayerSide = COLOURS.BLACK;
+        <% } %>
+        <% if(turn != (side-1)) { %>
+        $("#turn-label").text("Competitor Turn");
+        $("#turn-label").attr('class', 'label label-warning');
+        <% } else { %>
+        $("#turn-label").text("Your Turn");
+        $("#turn-label").attr('class', 'label label-success');
+        <% } %>
+        GUI.CheckAndSet();
+        GameController.GameSaved = false;
+        var t = 0;
+        <% history.forEach(function(el) { %>
+          $("#history_list ul").append('<li class="list-group-item '+(t == 0 ? 'active' : '')+'"> '+GUI.PrMove(parseInt('<%- el.move %>'))+' <span class="badge">'+ (t == GameController.PlayerSide ? parseInt('<%- el.score %>') : -1 * parseInt('<%- el.score %>')) + ' </span> </li>');
+          t ^= 1;
+        <% }); %>
+      }
+
+      socket.on('resMove', function(move) {
+        Move.MakeMove(move.move);
+        GUI.MoveGUIPiece(move.move);
+        GUI.CheckAndSet();
+        $("#turn-label").text("Your Turn");
+        $("#turn-label").attr('class', 'label label-success');
+        $("#history_list ul").append('<li class="list-group-item '+(GameController.PlayerSide != 0 ? 'active' : '')+'"> '+GUI.PrMove(move.move)+' <span class="badge">'+ -1 * move.score + ' </span> </li>');
+        if(GameController.GameOver == true)
+        {
+          setTimeout(function() {
+            window.location.replace('/');
+          }, 4000);
+        }
+      });
+
+
+
+
+
+
+
+
+      var minutesLabel = document.getElementById("minutes");
+      var secondsLabel = document.getElementById("seconds");
+      var totalSeconds = Number('<%-time%>');
+      setInterval(setTime, 1000);
+
+      function setTime() {
+        ++totalSeconds;
+        secondsLabel.innerHTML = pad(totalSeconds % 60);
+        minutesLabel.innerHTML = pad(parseInt(totalSeconds / 60));
+      }
+
+      function pad(val) {
+        var valString = val + "";
+        if (valString.length < 2) {
+          return "0" + valString;
+        } else {
+          return valString;
+        }
+      }
+
+      $("#draw").click(function() {
+        socket.emit('Ask_for_draw');
+      });
+
+      socket.on('Ask_for_draw', function() {
+        swal({
+            title: 'Asking for DRAW',
+            text: 'Your competitor ask you for draw?',
+            type: "info",
+            showCancelButton: true,
+            confirmButtonClass: "btn-success",
+            confirmButtonText: "Yes, agree!",
+            closeOnConfirm: false
+          },
+          function(isConfirm) {;
+            if (isConfirm) {
+              swal("Confirm!", "Game Finished Draw", "success");
+              socket.emit('Res_for_draw', true);
+              setTimeout(function() {
+                window.location.replace('/');
+              }, 3000);
+
+            } else {
+              socket.emit('Res_for_draw', false);
+            }
+          });
+
+      });
+
+      socket.on('Res_for_draw', function(val) {
+        if (val) {
+          swal({
+            title: 'Response',
+            text: 'Your competitor Accept',
+            type: "success",
+          });
+
+          setTimeout(function() {
+            window.location.replace('/');
+          }, 3000);
+        } else {
+          swal({
+            title: 'Response',
+            text: 'Your competitor ask you to continue, you can resend it after 3 moves',
+            type: "info",
+          });
+        }
+      });
+
+      socket.on('Resign', function() {
+        swal({
+          title: 'Resign',
+          text: 'Your competitor resign from this Game',
+          type: "success",
+        });
+
+        setTimeout(function() {
+          window.location.replace('/');
+        }, 3000);
+      });
+
+
+      $("#Resign").click(function(event) {
+        swal({
+            title: 'Resign from Game',
+            text: 'Are you sure ?',
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonClass: "btn-warning",
+            confirmButtonText: "Yes, I am sure!",
+            closeOnConfirm: false
+          },
+          function(isConfirm) {;
+            if (isConfirm) {
+              swal("OK", "we hope to find some interesting here!", "info");
+              socket.emit('Resign');
+              setTimeout(function() {
+                window.location.replace('/');
+              }, 3000);
+            }
+          });
+      });
+    </script>
+
+
+
+
+    <% include ../../layouts/footer %>
+
+</body>
+
+</html>
